@@ -35,8 +35,6 @@ enum ImageFilter: String, Identifiable, Hashable, CaseIterable {
     case sepia = "Sepia"
     case vibrance = "Vibrance"
     
-    
-    
     func performFilter(with image: NSImage, queue: DispatchQueue = serialQueue, completion: @escaping(NSImage) -> ()) {
         queue.async {
             let pictureInput = PictureInput(image: image)
@@ -62,40 +60,28 @@ enum ImageFilter: String, Identifiable, Hashable, CaseIterable {
                 pictureInput --> SketchFilter() --> pictureOutput
             case .zoomBlur:
                 pictureInput --> ZoomBlur() --> pictureOutput
-
             case .colorInversion:
                 pictureInput --> ColorInversion() --> pictureOutput
-
             case .emboss:
                 pictureInput --> EmbossFilter() --> pictureOutput
-
             case .halftone:
                 pictureInput --> Halftone() --> pictureOutput
-
             case .haze:
                 pictureInput --> Haze() --> pictureOutput
-
             case .kuwahara:
                 pictureInput --> KuwaharaFilter() --> pictureOutput
-
             case .luminance:
                 pictureInput --> Luminance() --> pictureOutput
-
             case .monochrome:
                 pictureInput --> MonochromeFilter() --> pictureOutput
-
             case .pixellate:
                 pictureInput --> Pixellate() --> pictureOutput
-
             case .posterize:
                 pictureInput --> Posterize() --> pictureOutput
-
             case .sepia:
                 pictureInput --> SepiaToneFilter() --> pictureOutput
-
             case .vibrance:
                 pictureInput --> Vibrance() --> pictureOutput
-
             }
             
             pictureOutput.imageAvailableCallback = { image in
@@ -103,7 +89,6 @@ enum ImageFilter: String, Identifiable, Hashable, CaseIterable {
                     completion(image)
                 }
             }
-            
             pictureInput.processImage(synchronously:true)
         }
     }

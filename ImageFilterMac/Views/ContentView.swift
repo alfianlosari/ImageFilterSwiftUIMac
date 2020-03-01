@@ -14,9 +14,8 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            InputView(image: appState.image, onSaveHandler: saveToFile, onSelectHandler: selectFile)
+            InputView(image: appState.image, filteredImage: appState.filteredImage, onImageReceived: { self.appState.image = $0 })
             Divider()
-            
             CarouselFilterView(image: appState.image) {
                 self.appState.filteredImage = $0
             }
@@ -28,60 +27,60 @@ struct ContentView: View {
         .padding(.bottom, 16)
         .frame(minWidth: 768, idealWidth: 768, maxWidth: 1024, minHeight: 648, maxHeight: 648)
     }
-    
-    private func saveToFile() {
-        guard let image = self.appState.filteredImage ?? self.appState.image else {
-            return
-        }
-        NSSavePanel.saveImage(image, completion: { _ in  })
-    }
-    
-    private func selectFile() {
-        NSOpenPanel.openImage { (result) in
-            if case let .success(image) = result {
-                self.appState.image = image
-            }
-        }
-    }
-    
 }
 
 struct InputView: View {
     
     let image: NSImage?
-    let onSaveHandler: () -> ()
-    let onSelectHandler: () -> ()
+    let filteredImage: NSImage?
+    let onImageReceived: (NSImage) -> ()
     
     var body: some View {
         VStack(spacing: 16) {
             HStack {
                 Text("Input image")
                     .font(.headline)
-                Button(action: onSelectHandler) {
+                Button(action: selectFile) {
                     Text("Select image")
                 }
             }
             
-            InputImageView()
+            InputImageView(image: image, filteredImage: filteredImage, onDropHandler: onImageReceived)
             
             if image != nil {
-                Button(action: onSaveHandler) {
+                Button(action: saveToFile) {
                     Text("Save image")
                 }
             }
         }
     }
-
+    
+    private func selectFile() {
+        NSOpenPanel.openImage { (result) in
+            if case let .success(image) = result {
+                self.onImageReceived(image)
+            }
+        }
+    }
+    
+    private func saveToFile() {
+        guard let image = filteredImage ?? image else {
+            return
+        }
+        NSSavePanel.saveImage(image, completion: { _ in  })
+    }
 }
 
 struct InputImageView: View {
     
-    @EnvironmentObject var appState: AppState
-    
+    let image: NSImage?
+    let filteredImage: NSImage?
+    let onDropHandler: (NSImage) -> ()
+        
     var body: some View {
         ZStack {
-            if appState.image != nil {
-                Image(nsImage: appState.filteredImage != nil ? appState.filteredImage! : appState.image!)
+            if image != nil {
+                Image(nsImage: filteredImage != nil ? filteredImage! : image!)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
             } else {
@@ -93,9 +92,8 @@ struct InputImageView: View {
         .background(Color.black.opacity(0.5))
         .cornerRadius(8)
         .onDrop(of: ["public.file-url"], isTargeted: nil, perform: handleOnDrop(providers:))
-        
     }
-    
+        
     private func handleOnDrop(providers: [NSItemProvider]) -> Bool {
         if let item = providers.first {
             item.loadItem(forTypeIdentifier: "public.file-url", options: nil) { (urlData, error) in
@@ -105,7 +103,7 @@ struct InputImageView: View {
                         guard let image = NSImage(contentsOf: url) else {
                             return
                         }
-                        self.appState.image = image
+                        self.onDropHandler(image)
                     }
                 }
             }

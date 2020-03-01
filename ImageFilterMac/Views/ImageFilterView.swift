@@ -13,6 +13,7 @@ struct CarouselFilterView: View {
     
     let image: NSImage?
     let onImageFilterSelected: (NSImage) -> Void
+    
     let imageFilters: [ImageFilter] = ImageFilter.allCases
     
     var body: some View {
