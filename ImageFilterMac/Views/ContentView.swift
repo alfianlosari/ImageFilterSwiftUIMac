@@ -91,6 +91,7 @@ struct InputImageView: View {
         .frame(height: 320)
         .background(Color.black.opacity(0.5))
         .cornerRadius(8)
+            
         .onDrop(of: ["public.file-url"], isTargeted: nil, perform: handleOnDrop(providers:))
     }
         

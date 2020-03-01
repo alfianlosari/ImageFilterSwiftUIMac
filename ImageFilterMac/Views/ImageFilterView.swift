@@ -76,10 +76,4 @@ struct ImageFilterView: View {
         }
         onImageSelected(filteredImage)
     }
-    
-    func filterImage() {
-        self.observableImageFilter.filter.performFilter(with: observableImageFilter.image) {
-            self.observableImageFilter.filteredImage = $0
-        }
-    }
 }
