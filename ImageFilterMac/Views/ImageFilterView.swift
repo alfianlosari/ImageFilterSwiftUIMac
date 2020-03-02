@@ -12,7 +12,7 @@ import Cocoa
 struct CarouselFilterView: View {
     
     let image: NSImage?
-    let onImageFilterSelected: (NSImage) -> Void
+    @Binding var filteredImage: NSImage?
     
     let imageFilters: [ImageFilter] = ImageFilter.allCases
     
@@ -25,7 +25,7 @@ struct CarouselFilterView: View {
                 ScrollView(.horizontal, showsIndicators: true) {
                     HStack(alignment: .top, spacing: 0) {
                         ForEach(imageFilters) { filter in
-                            ImageFilterView(observableImageFilter: ImageFilterObservable(image: self.image!, filter: filter), onImageSelected: self.onImageFilterSelected)
+                            ImageFilterView(observableImageFilter: ImageFilterObservable(image: self.image!, filter: filter), filteredImage: self.$filteredImage)
                                 .padding(.leading, 16)
                                 .padding(.trailing, self.imageFilters.last == filter ? 16 : 0)
                         }
@@ -48,7 +48,7 @@ extension CarouselFilterView: Equatable {
 struct ImageFilterView: View {
     
     @ObservedObject var observableImageFilter: ImageFilterObservable
-    let onImageSelected: (NSImage) -> ()
+    @Binding var filteredImage: NSImage?
     
     var body: some View {
         VStack {
@@ -74,6 +74,6 @@ struct ImageFilterView: View {
         guard let filteredImage = observableImageFilter.filteredImage else {
             return
         }
-        onImageSelected(filteredImage)
+        self.filteredImage = filteredImage
     }
 }

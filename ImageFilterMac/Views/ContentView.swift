@@ -14,11 +14,9 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            InputView(image: appState.image, filteredImage: appState.filteredImage, onImageReceived: { self.appState.image = $0 })
+            InputView(image: self.$appState.image, filteredImage: appState.filteredImage)
             Divider()
-            CarouselFilterView(image: appState.image) {
-                self.appState.filteredImage = $0
-            }
+            CarouselFilterView(image: appState.image, filteredImage: self.$appState.filteredImage)
             .equatable()
             
             Spacer()
@@ -31,9 +29,8 @@ struct ContentView: View {
 
 struct InputView: View {
     
-    let image: NSImage?
+    @Binding var image: NSImage?
     let filteredImage: NSImage?
-    let onImageReceived: (NSImage) -> ()
     
     var body: some View {
         VStack(spacing: 16) {
@@ -44,9 +41,7 @@ struct InputView: View {
                     Text("Select image")
                 }
             }
-            
-            InputImageView(image: image, filteredImage: filteredImage, onDropHandler: onImageReceived)
-            
+            InputImageView(image: self.$image, filteredImage: filteredImage)
             if image != nil {
                 Button(action: saveToFile) {
                     Text("Save image")
@@ -58,7 +53,7 @@ struct InputView: View {
     private func selectFile() {
         NSOpenPanel.openImage { (result) in
             if case let .success(image) = result {
-                self.onImageReceived(image)
+                self.image = image
             }
         }
     }
@@ -73,9 +68,8 @@ struct InputView: View {
 
 struct InputImageView: View {
     
-    let image: NSImage?
+    @Binding var image: NSImage?
     let filteredImage: NSImage?
-    let onDropHandler: (NSImage) -> ()
         
     var body: some View {
         ZStack {
@@ -104,7 +98,7 @@ struct InputImageView: View {
                         guard let image = NSImage(contentsOf: url) else {
                             return
                         }
-                        self.onDropHandler(image)
+                        self.image = image
                     }
                 }
             }
