@@ -9,12 +9,25 @@
 import SwiftUI
 import Cocoa
 
+fileprivate struct CarouselImageFilter: Identifiable {
+    
+    var id: String {
+        filter.rawValue + String(image.hashValue)
+    }
+    
+    var filter: ImageFilter
+    var image: NSImage
+}
+
 struct CarouselFilterView: View {
     
     let image: NSImage?
     @Binding var filteredImage: NSImage?
     
-    let imageFilters: [ImageFilter] = ImageFilter.allCases
+    fileprivate var imageFilters: [CarouselImageFilter] {
+        guard let image = self.image else { return [] }
+        return ImageFilter.allCases.map { CarouselImageFilter(filter: $0, image: image) }
+    }
     
     var body: some View {
         VStack {
@@ -24,11 +37,12 @@ struct CarouselFilterView: View {
                 
                 ScrollView(.horizontal, showsIndicators: true) {
                     HStack(alignment: .top, spacing: 0) {
-                        ForEach(imageFilters) { filter in
-                            ImageFilterView(observableImageFilter: ImageFilterObservable(image: self.image!, filter: filter), filteredImage: self.$filteredImage)
+                        ForEach(imageFilters) { imageFilter in
+                            ImageFilterView(observableImageFilter: ImageFilterObservable(image: imageFilter.image, filter: imageFilter.filter), filteredImage: self.$filteredImage)
                                 .padding(.leading, 16)
-                                .padding(.trailing, self.imageFilters.last == filter ? 16 : 0)
+                                .padding(.trailing, self.imageFilters.last!.filter == imageFilter.filter ? 16 : 0)
                         }
+        
                     }
                     .frame(height: 140)
                 }
@@ -67,6 +81,7 @@ struct ImageFilterView: View {
             Text(observableImageFilter.filter.rawValue)
                 .font(.subheadline)
         }
+        .onAppear(perform: self.observableImageFilter.filterImage)
         .onTapGesture(perform: handleOnTap)
     }
     

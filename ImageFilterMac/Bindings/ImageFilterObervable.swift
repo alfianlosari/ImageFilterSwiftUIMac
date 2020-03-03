@@ -19,7 +19,6 @@ class ImageFilterObservable: ObservableObject {
     init(image: NSImage, filter: ImageFilter) {
         self.image = image
         self.filter = filter
-        self.filterImage()
     }
     
     func filterImage() {
